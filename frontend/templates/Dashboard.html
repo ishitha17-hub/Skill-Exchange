@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - Skill-Exchange{% endblock %}
+{% block content %}
+<style>
+  /* ── Hero greeting ── */
+  .dash-hero {
+    border-radius: 24px;
+    background: linear-gradient(135deg, #0d1b4b 0%, #1565c0 45%, #7b1fa2 80%, #0097a7 100%);
+    padding: 2.4rem 2.5rem;
+    color: white;
+    position: relative; overflow: hidden;
+    margin-bottom: 1.75rem;
+    box-shadow: 0 12px 40px rgba(13,27,75,0.35);
+  }
+  .dash-hero::before {
+    content: '';
+    position: absolute; width: 340px; height: 340px; border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    top: -120px; right: -80px;
+    animation: heroBlob 8s ease-in-out infinite alternate;
+  }
+  .dash-hero::after {
+    content: '';
+    position: absolute; width: 200px; height: 200px; border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    bottom: -70px; left: 40%;
+    animation: heroBlob 11s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes heroBlob {
+    0%   { transform: scale(1) translate(0,0); }
+    100% { transform: scale(1.12) translate(20px, 15px); }
+  }
+  .dash-hero h2 {
+    font-size: 1.95rem; font-weight: 900; margin-bottom: 0.4rem;
+    position: relative; z-index: 1;
+  }
+  .dash-hero p { opacity: 0.8; font-size: 0.95rem; position: relative; z-index:1; margin-bottom: 1.4rem; }
+  .dash-hero-actions { position: relative; z-index: 1; display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .dash-hero-actions .btn-hero {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white; border-radius: 12px;
+    padding: 0.55rem 1.2rem; font-weight: 600; font-size: 0.88rem;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 0.45rem;
+    transition: background .2s, transform .2s;
+    backdrop-filter: blur(4px);
+  }
+  .dash-hero-actions .btn-hero:hover {
+    background: rgba(255,255,255,0.28); color: white;
+    transform: translateY(-2px);
+  }
+  .dash-hero-actions .btn-hero-primary {
+    background: white; color: #1565c0; border-color: white;
+    font-weight: 700;
+  }
+  .dash-hero-actions .btn-hero-primary:hover { background: #e3f2fd; color: #0d47a1; }
+
+  .greeting-avatar {
+    width: 56px; height: 56px; border-radius: 16px;
+    background: rgba(255,255,255,0.2); backdrop-filter: blur(8px);
+    border: 2px solid rgba(255,255,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; font-weight: 900; color: white;
+    position: relative; z-index: 1; margin-bottom: 1rem;
+  }
+
+  /* ── Stat cards ── */
+  .stat-card {
+    border-radius: 20px; border: none;
+    padding: 1.5rem 1.6rem;
+    position: relative; overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+    cursor: default;
+  }
+  .stat-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.18) !important; }
+  .stat-card .stat-icon {
+    position: absolute; right: 1rem; top: 50%;
+    transform: translateY(-50%);
+    font-size: 5rem; opacity: 0.1; line-height: 1;
+  }
+  .stat-card .stat-number {
+    font-size: 2.8rem; font-weight: 900; line-height: 1; margin-bottom: 0.3rem;
+  }
+  .stat-card .stat-label {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; opacity: 0.8;
+  }
+  .stat-1 { background: linear-gradient(135deg, #1565c0, #0d47a1); color: white;
+             box-shadow: 0 8px 30px rgba(21,101,192,0.4); }
+  .stat-2 { background: linear-gradient(135deg, #00897b, #004d40); color: white;
+             box-shadow: 0 8px 30px rgba(0,137,123,0.4); }
+  .stat-3 { background: linear-gradient(135deg, #7b1fa2, #4a148c); color: white;
+             box-shadow: 0 8px 30px rgba(123,31,162,0.4); }
+  .stat-4 { background: linear-gradient(135deg, #ef6c00, #bf360c); color: white;
+             box-shadow: 0 8px 30px rgba(239,108,0,0.35); }
+
+  /* ── Section headers ── */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-size: 1rem; font-weight: 800; color: #1a237e;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .section-title i { color: #1565c0; }
+
+  /* ── Course promo banner ── */
+  .course-banner {
+    border-radius: 20px;
+    background: linear-gradient(135deg, #0d1b4b 0%, #1565c0 50%, #0097a7 100%);
+    padding: 1.6rem 2rem;
+    color: white; position: relative; overflow: hidden;
+    box-shadow: 0 8px 30px rgba(13,27,75,0.3);
+  }
+  .course-banner::before {
+    content: '💻';
+    position: absolute; font-size: 7rem;
+    right: 1.5rem; top: 50%; transform: translateY(-50%);
+    opacity: 0.08; pointer-events: none;
+  }
+
+  /* ── Premium table ── */
+  .premium-table { border-radius: 16px; overflow: hidden; }
+  .premium-table thead th {
+    background: #f0f4ff; color: #607d8b;
+    font-size: 0.72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    border: none; padding: 0.9rem 1rem;
+  }
+  .premium-table tbody td {
+    border: none; border-bottom: 1px solid #f0f4ff;
+    padding: 0.9rem 1rem; font-size: 0.9rem; color: #37474f;
+    vertical-align: middle;
+  }
+  .premium-table tbody tr:last-child td { border-bottom: none; }
+  .premium-table tbody tr:hover td { background: #f7faff; }
+
+  /* ── Glass cards ── */
+  .glass-card {
+    background: white; border-radius: 20px; border: none;
+    box-shadow: 0 4px 24px rgba(21,101,192,0.08);
+    overflow: hidden;
+  }
+  .glass-card-header {
+    background: white; padding: 1.2rem 1.5rem 0.8rem;
+    border-bottom: 1px solid #f0f4ff;
+  }
+
+  /* ── Quick action grid ── */
+  .quick-action {
+    border-radius: 16px; padding: 1.2rem 1rem;
+    text-align: center; text-decoration: none;
+    transition: transform .2s, box-shadow .2s;
+    display: block; border: 2px solid transparent;
+    background: white;
+    box-shadow: 0 2px 12px rgba(21,101,192,0.08);
+  }
+  .quick-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(21,101,192,0.18);
+    border-color: #e3f2fd;
+  }
+  .quick-action-icon {
+    width: 50px; height: 50px; border-radius: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; margin-bottom: 0.6rem;
+  }
+  .quick-action-label {
+    font-size: 0.8rem; font-weight: 700; color: #37474f;
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center; padding: 3rem 1.5rem;
+  }
+  .empty-state i { font-size: 3rem; opacity: 0.25; display: block; margin-bottom: 0.75rem; }
+  .empty-state p { font-size: 0.9rem; color: #78909c; margin-bottom: 1rem; }
+
+  /* ── Cert badge ── */
+  .cert-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: linear-gradient(135deg,#fff8e1,#fff3e0);
+    border: 1px solid #ffe082; border-radius: 20px;
+    padding: 0.2rem 0.7rem; font-size: 0.78rem; font-weight: 700;
+    color: #e65100;
+  }
+</style>
+
+<!-- ─── HERO ──────────────────────────────────────────────── -->
+<div class="dash-hero">
+  <div class="greeting-avatar">{{ current_user.name[0].upper() }}</div>
+  <h2>Welcome back, {{ current_user.name.split()[0] }}! 👋</h2>
+  <p>Here's everything happening on your learning journey today.</p>
+  <div class="dash-hero-actions">
+    <a href="{{ url_for('course.courses_list') }}" class="btn-hero btn-hero-primary">
+      <i class="bi bi-play-circle-fill"></i> Browse Courses
+    </a>
+    <a href="{{ url_for('user.mock_tests') }}" class="btn-hero">
+      <i class="bi bi-journal-check"></i> Take a Test
+    </a>
+    <a href="{{ url_for('user.browse_skills') }}" class="btn-hero">
+      <i class="bi bi-search"></i> Explore Skills
+    </a>
+    <a href="{{ url_for('user.upload_skill') }}" class="btn-hero">
+      <i class="bi bi-cloud-upload"></i> Upload Skill
+    </a>
+  </div>
+</div>
+
+<!-- ─── STAT CARDS ─────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="stat-card stat-1 shadow">
+      <div class="stat-icon"><i class="bi bi-journal-code"></i></div>
+      <div class="stat-number">{{ stats.skills_uploaded }}</div>
+      <div class="stat-label">Skills Uploaded</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card stat-2 shadow">
+      <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+      <div class="stat-number">{{ stats.tests_passed }}</div>
+      <div class="stat-label">Tests Passed</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card stat-3 shadow">
+      <div class="stat-icon"><i class="bi bi-award"></i></div>
+      <div class="stat-number">{{ stats.certificates }}</div>
+      <div class="stat-label">Certificates</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card stat-4 shadow">
+      <div class="stat-icon"><i class="bi bi-fire"></i></div>
+      <div class="stat-number">{{ (stats.tests_passed or 0) + (stats.skills_uploaded or 0) }}</div>
+      <div class="stat-label">Total Activity</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── QUICK ACTIONS ──────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+  {% set actions = [
+    (url_for('course.courses_list'), 'bi bi-play-circle-fill', 'linear-gradient(135deg,#1565c0,#0097a7)', 'Courses'),
+    (url_for('user.mock_tests'),     'bi bi-journal-check',     'linear-gradient(135deg,#7b1fa2,#e040fb)', 'Mock Tests'),
+    (url_for('user.browse_skills'),  'bi bi-search',            'linear-gradient(135deg,#00897b,#26c6da)', 'Browse Skills'),
+    (url_for('user.upload_skill'),   'bi bi-cloud-arrow-up',    'linear-gradient(135deg,#ef6c00,#ffd54f)', 'Upload Skill'),
+  ] %}
+  {% for href, icon, grad, label in actions %}
+  <div class="col-6 col-md-3">
+    <a href="{{ href }}" class="quick-action">
+      <div class="quick-action-icon" style="background:{{ grad }};">
+        <i class="{{ icon }} text-white"></i>
+      </div>
+      <div class="quick-action-label">{{ label }}</div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ─── COURSE BANNER ──────────────────────────────────────── -->
+<div class="course-banner mb-4">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div style="position:relative;z-index:1;">
+      <div class="d-flex gap-2 mb-2">
+        <span class="badge bg-warning text-dark fw-bold rounded-pill px-3">🔥 Hot</span>
+        <span class="badge bg-success rounded-pill px-3">Free Certificates</span>
+      </div>
+      <h5 class="fw-bold mb-1">Learn Programming — Python, JS, Java, C++, SQL</h5>
+      <p class="opacity-75 mb-0 small">Watch curated videos, complete quizzes, and earn downloadable certificates.</p>
+    </div>
+    <a href="{{ url_for('course.courses_list') }}"
+       class="btn btn-warning fw-bold rounded-pill px-4 py-2 text-dark shadow-sm flex-shrink-0"
+       style="position:relative;z-index:1;">
+      <i class="bi bi-play-circle me-2"></i>Browse Courses
+    </a>
+  </div>
+</div>
+
+<!-- ─── SKILLS TABLE ───────────────────────────────────────── -->
+<div class="glass-card mb-4">
+  <div class="glass-card-header d-flex align-items-center justify-content-between">
+    <div class="section-title"><i class="bi bi-journal-code"></i> Your Uploaded Skills</div>
+    <a href="{{ url_for('user.upload_skill') }}" class="btn btn-sm btn-primary rounded-pill px-3">
+      <i class="bi bi-plus me-1"></i>Upload New
+    </a>
+  </div>
+  <div class="p-1">
+    {% if user_skills %}
+    <div class="table-responsive">
+      <table class="table premium-table mb-0">
+        <thead><tr>
+          <th>Title</th><th>Description</th><th>Uploaded</th><th>Action</th>
+        </tr></thead>
+        <tbody>
+          {% for skill in user_skills %}
+          <tr>
+            <td class="fw-semibold text-primary">{{ skill.title }}</td>
+            <td class="text-truncate" style="max-width:200px;" title="{{ skill.description }}">{{ skill.description }}</td>
+            <td><span class="badge bg-light text-muted border">{{ skill.created_at.strftime('%b %d, %Y') if skill.created_at else 'N/A' }}</span></td>
+            <td><a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3">View</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="bi bi-inbox text-primary"></i>
+      <p>You haven't uploaded any skills yet.</p>
+      <a href="{{ url_for('user.upload_skill') }}" class="btn btn-primary btn-sm rounded-pill px-4">Upload Your First Skill</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ─── CERTIFICATES ───────────────────────────────────────── -->
+<div class="glass-card mb-4">
+  <div class="glass-card-header d-flex align-items-center justify-content-between">
+    <div class="section-title"><i class="bi bi-award-fill text-warning"></i> My Certificates</div>
+    <span class="badge bg-warning text-dark fw-bold rounded-pill px-3">
+      {{ stats.certificates }} Earned
+    </span>
+  </div>
+  <div class="p-1">
+    {% if user_certs %}
+    <div class="table-responsive">
+      <table class="table premium-table mb-0">
+        <thead><tr><th>Course / Skill</th><th>Date Earned</th><th>Download</th></tr></thead>
+        <tbody>
+          {% for cert in user_certs %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-warning text-white"
+                  style="width:30px;height:30px;font-size:0.85rem;">
+                  <i class="bi bi-award-fill"></i>
+                </span>
+                <span class="fw-semibold">{{ cert.skill_name }}</span>
+              </div>
+            </td>
+            <td><span class="cert-badge"><i class="bi bi-calendar3"></i>{{ cert.date.strftime('%b %d, %Y') if cert.date else 'N/A' }}</span></td>
+            <td>
+              <a href="{{ url_for('user.download_certificate', cert_id=cert.cert_id) }}"
+                 class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
+                <i class="bi bi-download me-1"></i>PDF
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="bi bi-award text-warning"></i>
+      <p>No certificates yet. Pass a mock test or course quiz to earn one!</p>
+      <div class="d-flex gap-2 justify-content-center flex-wrap">
+        <a href="{{ url_for('user.mock_tests') }}" class="btn btn-sm btn-primary rounded-pill px-4">Browse Mock Tests</a>
+        <a href="{{ url_for('course.courses_list') }}" class="btn btn-sm btn-outline-primary rounded-pill px-4">Browse Courses</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

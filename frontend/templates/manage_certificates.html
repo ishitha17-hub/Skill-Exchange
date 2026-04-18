@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Manage Certificates - Admin{% endblock %}
+{% block content %}
+<div class="row pt-3 mb-4">
+    <div class="col">
+        <h2 class="fw-bold mb-1"><i class="bi bi-award-fill text-warning me-2"></i>Manage Certificates</h2>
+        <p class="text-muted fs-5">Overview of all certifications issued on the platform.</p>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="px-4 py-3 border-0">Certificate ID</th>
+                    <th class="py-3 border-0">Recipient Name</th>
+                    <th class="py-3 border-0">Course / Skill</th>
+                    <th class="py-3 border-0">Date Issued</th>
+                    <th class="py-3 border-0">Source</th>
+                    <th class="py-3 border-0 text-end px-4">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cert in certs %}
+                <tr>
+                    <td class="px-4"><code class="small text-muted">{{ cert.cert_id[:8] }}...</code></td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold" style="width:32px;height:32px;font-size:0.8rem;">
+                                {{ cert.user_name[0]|upper if cert.user_name else 'U' }}
+                            </div>
+                            <span class="fw-semibold">{{ cert.user_name or 'Unknown User' }}</span>
+                        </div>
+                    </td>
+                    <td><span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-3">{{ cert.skill_name }}</span></td>
+                    <td><span class="text-muted small">{{ cert.date.strftime('%B %d, %Y') if cert.date else 'N/A' }}</span></td>
+                    <td>
+                        {% if cert.source == 'course' %}
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 small">Course</span>
+                        {% else %}
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 small">Skill</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end px-4">
+                        <a href="{{ url_for('admin.view_certificate', cert_id=cert.cert_id) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                            <i class="bi bi-eye me-1"></i>View PDF
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <i class="bi bi-award fs-1 opacity-25 d-block mb-3"></i>
+                        <p class="text-muted">No certificates have been issued yet.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

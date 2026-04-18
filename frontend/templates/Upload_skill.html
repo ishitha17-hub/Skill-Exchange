@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Upload Skill - Skill-Exchange{% endblock %}
+{% block content %}
+<div class="row pt-3 mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('user.dashboard') }}"
+                        class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Upload Skill</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold mb-1">Share a Skill</h2>
+        <p class="text-muted">Upload your learning resources so other students can learn from you.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-5">
+                <form method="POST">
+                    <div class="mb-4">
+                        <label class="form-label text-secondary fw-semibold small text-uppercase">Skill Title</label>
+                        <input type="text" name="title" class="form-control form-control-lg bg-light" required
+                            placeholder="e.g., Introduction to React.js">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-secondary fw-semibold small text-uppercase">Description</label>
+                        <textarea name="description" class="form-control bg-light" rows="5" required
+                            placeholder="Describe what this skill involves and what students will learn..."></textarea>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="form-label text-secondary fw-semibold small text-uppercase">Learning Resource
+                            Link</label>
+                        <input type="url" name="resource_link" class="form-control bg-light"
+                            placeholder="e.g., https://youtube.com/watch?v=... (Optional)">
+                        <div class="form-text mt-1 text-muted"><i class="bi bi-info-circle me-1"></i>You can link to a
+                            video, article, or shared document.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ url_for('user.dashboard') }}" class="btn btn-light btn-lg me-3">Cancel</a>
+                        <button type="submit" class="btn btn-primary btn-lg shadow-sm px-5 fw-bold"><i
+                                class="bi bi-cloud-arrow-up me-2"></i>Publish Skill</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mt-4 mt-lg-0">
+        <div class="card bg-primary text-white border-0 shadow-sm rounded-4 h-100"
+            style="background: linear-gradient(135deg, #0d6efd, #0dcaf0);">
+            <div class="card-body p-4 d-flex flex-column justify-content-center">
+                <div class="text-center mb-4">
+                    <i class="bi bi-lightbulb display-1 opacity-75"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Tips for a great skill sharing</h4>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-3 d-flex align-items-start"><i class="bi bi-check-circle-fill me-2 mt-1"></i>Be
+                        descriptive about what people will learn.</li>
+                    <li class="mb-3 d-flex align-items-start"><i class="bi bi-check-circle-fill me-2 mt-1"></i>Provide
+                        high quality resource links (Videos/PDFs).</li>
+                    <li class="d-flex align-items-start"><i class="bi bi-check-circle-fill me-2 mt-1"></i>Create a mock
+                        test later so students can get certified.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard - Skill-Exchange{% endblock %}
+{% block content %}
+<div class="row pt-3 mb-4">
+    <div class="col">
+        <h2 class="fw-bold mb-1"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</h2>
+        <p class="text-muted fs-5">Platform statistics and overview.</p>
+    </div>
+</div>
+
+<style>
+    .dashboard-link { text-decoration: none; display: block; height: 100%; transition: transform 0.2s, box-shadow 0.2s; }
+    .dashboard-link:hover { transform: translateY(-5px); }
+    .dashboard-link:hover .card { box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important; }
+</style>
+
+<div class="row g-4 mb-5">
+    <!-- Total Users -->
+    <div class="col-md-6 col-lg-3">
+        <a href="{{ url_for('admin.manage_users') }}" class="dashboard-link">
+            <div class="card bg-primary text-white border-0 shadow-sm rounded-4 h-100 p-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="card-title text-uppercase fw-bold opacity-75 mb-0">Total Users</h6>
+                        <i class="bi bi-people fs-3 opacity-50"></i>
+                    </div>
+                    <h2 class="display-4 fw-bolder mb-0">{{ stats.total_users }}</h2>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Total Skills -->
+    <div class="col-md-6 col-lg-3">
+        <a href="{{ url_for('admin.manage_content') }}" class="dashboard-link">
+            <div class="card bg-success text-white border-0 shadow-sm rounded-4 h-100 p-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="card-title text-uppercase fw-bold opacity-75 mb-0">Total Skills</h6>
+                        <i class="bi bi-journal-code fs-3 opacity-50"></i>
+                    </div>
+                    <h2 class="display-4 fw-bolder mb-0">{{ stats.total_skills }}</h2>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Total Mock Tests -->
+    <div class="col-md-6 col-lg-3">
+        <a href="{{ url_for('admin.manage_tests') }}" class="dashboard-link">
+            <div class="card bg-warning text-dark border-0 shadow-sm rounded-4 h-100 p-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="card-title text-uppercase fw-bold opacity-75 mb-0">Mock Tests</h6>
+                        <i class="bi bi-journal-check fs-3 opacity-50"></i>
+                    </div>
+                    <h2 class="display-4 fw-bolder mb-0">{{ stats.total_tests }}</h2>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Certificates -->
+    <div class="col-md-6 col-lg-3">
+        <a href="{{ url_for('admin.manage_certificates') }}" class="dashboard-link">
+            <div class="card bg-info text-white border-0 shadow-sm rounded-4 h-100 p-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="card-title text-uppercase fw-bold opacity-75 mb-0">Certificates</h6>
+                        <i class="bi bi-award fs-3 opacity-50"></i>
+                    </div>
+                    <h2 class="display-4 fw-bolder mb-0">{{ stats.total_certificates }}</h2>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <a href="{{ url_for('admin.manage_users') }}"
+            class="btn btn-outline-primary btn-lg w-100 p-4 rounded-4 shadow-sm text-start justify-content-between d-flex align-items-center">
+            <span class="fw-bold fs-5">Manage Users</span>
+            <i class="bi bi-arrow-right fs-4"></i>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('admin.manage_content') }}"
+            class="btn btn-outline-success btn-lg w-100 p-4 rounded-4 shadow-sm text-start justify-content-between d-flex align-items-center">
+            <span class="fw-bold fs-5">Content Moderation</span>
+            <i class="bi bi-arrow-right fs-4"></i>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('admin.manage_tests') }}"
+            class="btn btn-outline-warning btn-lg w-100 p-4 rounded-4 shadow-sm text-start justify-content-between d-flex align-items-center">
+            <span class="fw-bold fs-5 text-dark">Manage Tests</span>
+            <i class="bi bi-arrow-right fs-4 text-dark"></i>
+        </a>
+    </div>
+</div>
+{% endblock %}

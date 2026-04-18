@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block title %}Test Result - Skill-Exchange{% endblock %}
+{% block content %}
+
+<div class="row pt-5 justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-9 col-lg-7">
+
+        <!-- Result Card -->
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <!-- Header -->
+            <div class="card-header border-0 text-center text-white p-5
+                {% if passed %}bg-success{% else %}bg-danger{% endif %}"
+                style="background: {% if passed %}linear-gradient(135deg,#198754,#0f5132){% else %}linear-gradient(135deg,#dc3545,#842029){% endif %} !important;">
+                <div class="mb-3">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-20 shadow-sm"
+                        style="width:90px;height:90px;">
+                        <i class="bi {% if passed %}bi-trophy-fill text-warning{% else %}bi-x-circle-fill text-white{% endif %}"
+                            style="font-size:3rem;"></i>
+                    </span>
+                </div>
+                <h2 class="fw-bold mb-1">{% if passed %}Congratulations! 🎉{% else %}Keep Trying!{% endif %}</h2>
+                <p class="mb-0 fs-5 opacity-90">You <strong>{% if passed %}passed{% else %}failed{% endif %}</strong> the test</p>
+                <p class="mb-0 mt-1 opacity-75 small">{{ test.title }}</p>
+            </div>
+
+            <!-- Score Stats -->
+            <div class="card-body p-4 p-md-5">
+                <div class="row g-3 justify-content-center mb-4 text-center">
+                    <div class="col-4">
+                        <div class="bg-light rounded-4 p-3">
+                            <span class="d-block text-muted small text-uppercase fw-semibold mb-1">Score</span>
+                            <span class="fs-2 fw-bold {% if passed %}text-success{% else %}text-danger{% endif %}">
+                                {{ score }}/{{ total }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-light rounded-4 p-3">
+                            <span class="d-block text-muted small text-uppercase fw-semibold mb-1">Percentage</span>
+                            <span class="fs-2 fw-bold text-dark">
+                                {{ ((score / total) * 100) | round | int if total > 0 else 0 }}%
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-light rounded-4 p-3">
+                            <span class="d-block text-muted small text-uppercase fw-semibold mb-1">Pass Mark</span>
+                            <span class="fs-2 fw-bold text-primary">70%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Score Progress Bar -->
+                <div class="mb-4">
+                    {% set pct = ((score / total) * 100) | round | int if total > 0 else 0 %}
+                    <div class="progress rounded-pill" style="height:12px;">
+                        <div class="progress-bar {% if passed %}bg-success{% else %}bg-danger{% endif %} rounded-pill"
+                            role="progressbar" style="width:{{ pct }}%" id="score-bar"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-1">
+                        <small class="text-muted">0%</small>
+                        <small class="text-primary fw-bold">Pass line: 70%</small>
+                        <small class="text-muted">100%</small>
+                    </div>
+                </div>
+
+                <!-- Certificate Section (only when passed) -->
+                {% if passed and cert_id %}
+                <div class="card border-0 rounded-4 mb-4 overflow-hidden"
+                    style="background: linear-gradient(135deg, #f8f9fa, #e8f5e9);">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="d-flex align-items-center justify-content-center rounded-circle bg-success text-white flex-shrink-0"
+                                style="width:52px;height:52px;">
+                                <i class="bi bi-award-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-success">Certificate Ready!</h6>
+                                <p class="text-muted small mb-0">Your completion certificate has been generated</p>
+                            </div>
+                        </div>
+
+                        <!-- Certificate Preview Box -->
+                        <div class="border border-success border-opacity-25 rounded-3 p-4 text-center mb-3"
+                            style="background: linear-gradient(135deg,#fff 60%,rgba(25,135,84,0.05)); font-family: Georgia, serif;">
+                            <p class="text-muted small mb-1 text-uppercase fw-semibold letter-spacing-1">Smart Skill-Exchange</p>
+                            <h5 class="fw-bold text-primary mb-1" style="font-size:1.1rem;">Certificate of Achievement</h5>
+                            <hr class="border-success opacity-25">
+                            <p class="text-muted small mb-1">This certifies that</p>
+                            <p class="fw-bold fs-5 text-dark mb-1">{{ current_user.name }}</p>
+                            <p class="text-muted small mb-1">has successfully completed</p>
+                            <p class="fw-bold text-success mb-0">{{ test.title }}</p>
+                        </div>
+
+                        <a href="{{ url_for('user.download_certificate', cert_id=cert_id) }}"
+                            class="btn btn-success w-100 rounded-pill fw-bold py-2 shadow-sm">
+                            <i class="bi bi-download me-2"></i>Download Certificate (PDF)
+                        </a>
+                    </div>
+                </div>
+
+                {% elif passed %}
+                <div class="alert alert-warning rounded-4 border-0 mb-4">
+                    <i class="bi bi-hourglass-split me-2"></i>
+                    Certificate is being processed — check your dashboard shortly.
+                </div>
+                {% else %}
+                <!-- Failed state: encourage retry -->
+                <div class="card border-0 rounded-4 mb-4 bg-light">
+                    <div class="card-body p-4 text-center">
+                        <i class="bi bi-lightning-charge-fill text-warning fs-1 mb-2 d-block"></i>
+                        <h6 class="fw-bold mb-1">Don't give up!</h6>
+                        <p class="text-muted small mb-3">You need at least <strong>70%</strong> to earn a certificate. Review the material and try again.</p>
+                        <a href="{{ url_for('user.take_test', test_id=test._id) }}"
+                            class="btn btn-outline-primary rounded-pill px-4">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Retry Test
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <a href="{{ url_for('user.dashboard') }}"
+                    class="btn btn-light w-100 rounded-pill fw-medium text-secondary">
+                    <i class="bi bi-house me-2"></i>Return to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if passed %}
+<!-- Confetti on pass -->
+<script>
+(function(){
+    const colors = ['#198754','#0d6efd','#ffc107','#6610f2','#fd7e14','#20c997'];
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;';
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+
+    const pieces = Array.from({length:120}, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * -canvas.height,
+        w: Math.random() * 10 + 5,
+        h: Math.random() * 6 + 3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rot: Math.random() * 360,
+        speed: Math.random() * 3 + 2,
+        rotSpeed: Math.random() * 4 - 2
+    }));
+
+    let frame = 0;
+    function draw(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        pieces.forEach(p => {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot * Math.PI / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+            ctx.restore();
+            p.y += p.speed;
+            p.rot += p.rotSpeed;
+            if(p.y > canvas.height) { p.y = -20; p.x = Math.random() * canvas.width; }
+        });
+        frame++;
+        if(frame < 200) requestAnimationFrame(draw);
+        else { canvas.style.opacity='0'; canvas.style.transition='opacity 1s'; setTimeout(()=>canvas.remove(),1000); }
+    }
+    draw();
+})();
+</script>
+{% endif %}
+{% endblock %}

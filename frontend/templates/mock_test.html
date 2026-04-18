@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% block title %}Take Test: {{ test.title }} - Skill-Exchange{% endblock %}
+{% block content %}
+
+<!-- Test Header -->
+<div class="row pt-3 mb-4">
+    <div class="col-lg-9 mx-auto">
+        <div class="card border-0 rounded-4 text-white overflow-hidden"
+            style="background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);">
+            <div class="card-body p-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <p class="text-white-50 mb-1 small fw-semibold text-uppercase">
+                        <i class="bi bi-journal-check me-1"></i>Online Mock Test
+                    </p>
+                    <h3 class="fw-bold mb-0">{{ test.title }}</h3>
+                    <p class="mb-0 mt-1 opacity-75 small">Score <strong>70% or more</strong> to earn your certificate</p>
+                </div>
+                <!-- Countdown Timer -->
+                <div class="text-center flex-shrink-0">
+                    <div id="timer-box"
+                        class="bg-white bg-opacity-15 rounded-3 border border-white border-opacity-25 px-4 py-2">
+                        <div class="text-white-50 small fw-semibold text-uppercase mb-1">
+                            <i class="bi bi-clock me-1"></i>Time Left
+                        </div>
+                        <div id="timer-display" class="fw-bold fs-3 text-white font-monospace">30:00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if questions %}
+<!-- Progress Bar -->
+<div class="row mb-4">
+    <div class="col-lg-9 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="small text-muted fw-semibold">Progress</span>
+            <span class="small text-muted"><span id="answered-count">0</span> / {{ questions|length }} answered</span>
+        </div>
+        <div class="progress rounded-pill" style="height:8px;">
+            <div id="progress-bar" class="progress-bar bg-success rounded-pill transition-all"
+                role="progressbar" style="width:0%" aria-valuenow="0" aria-valuemin="0"
+                aria-valuemax="{{ questions|length }}"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Test Form -->
+<div class="row">
+    <div class="col-lg-9 mx-auto">
+        <form method="POST" id="test-form" onsubmit="return confirmSubmit()">
+            {% for q in questions %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4 question-card" id="qcard-{{ loop.index }}">
+                <div class="card-body p-4 p-md-5">
+                    <!-- Question Number Badge + Text -->
+                    <div class="d-flex align-items-start gap-3 mb-4">
+                        <span class="badge rounded-circle bg-primary d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                            style="width:38px;height:38px;font-size:1rem;">{{ loop.index }}</span>
+                        <h5 class="fw-semibold mb-0 lh-base pt-1">{{ q.question_text }}</h5>
+                    </div>
+
+                    <!-- Options -->
+                    <div class="row g-3">
+                        {% for opt, letter in [('optionA','A'),('optionB','B'),('optionC','C'),('optionD','D')] %}
+                        <div class="col-md-6">
+                            <label class="option-label w-100 rounded-3 border p-3 cursor-pointer d-flex align-items-center gap-3"
+                                for="q{{ q._id }}_{{ letter }}">
+                                <input class="form-check-input flex-shrink-0 mt-0 option-radio"
+                                    type="radio"
+                                    name="question_{{ q._id }}"
+                                    id="q{{ q._id }}_{{ letter }}"
+                                    value="{{ letter }}"
+                                    data-card="{{ loop.index }}"
+                                    required>
+                                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold rounded-2 px-2 py-1 flex-shrink-0">{{ letter }}</span>
+                                <span class="text-dark">{{ q[opt] }}</span>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- Bottom answered indicator -->
+                <div class="card-footer bg-transparent border-0 px-4 pb-3 pt-0 d-flex justify-content-end">
+                    <span class="answered-tag d-none badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3">
+                        <i class="bi bi-check2 me-1"></i>Answered
+                    </span>
+                    <span class="unanswered-tag badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3">
+                        <i class="bi bi-dash-circle me-1"></i>Not answered
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Submit -->
+            <div class="card border-0 shadow-sm rounded-4 mb-5 bg-light">
+                <div class="card-body p-4 text-center">
+                    <p class="text-muted mb-3 small">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Make sure you've answered all <strong>{{ questions|length }}</strong> questions before submitting.
+                        Passing (≥70%) automatically generates your certificate.
+                    </p>
+                    <button type="submit" id="submit-btn"
+                        class="btn btn-primary btn-lg rounded-pill fw-bold px-5 shadow-sm">
+                        <i class="bi bi-send-check me-2"></i>Submit Answers
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% else %}
+<div class="row">
+    <div class="col-lg-9 mx-auto text-center py-5">
+        <div class="card border-0 shadow-sm rounded-4 p-5">
+            <i class="bi bi-tools display-1 opacity-25 mb-3 d-block text-secondary"></i>
+            <h5 class="fw-bold">No Questions Available Yet</h5>
+            <p class="text-muted">The admin hasn't added questions to this test yet. Check back later!</p>
+            <a href="{{ url_for('user.mock_tests') }}" class="btn btn-outline-primary mt-2 rounded-pill">← Back to Tests</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Unsaved leave warning -->
+<script>
+    let formDirty = false;
+    document.querySelectorAll('.option-radio').forEach(r => r.addEventListener('change', () => formDirty = true));
+    window.addEventListener('beforeunload', e => {
+        if (formDirty) { e.preventDefault(); e.returnValue = ''; }
+    });
+    document.getElementById('test-form')?.addEventListener('submit', () => formDirty = false);
+</script>
+
+<!-- Live Option Highlight + Progress Tracker -->
+<script>
+    const totalQuestions = {{ questions|length }};
+    const answered = new Set();
+
+    document.querySelectorAll('.option-radio').forEach(radio => {
+        radio.addEventListener('change', function () {
+            const cardIdx = this.dataset.card;
+            const card = document.getElementById('qcard-' + cardIdx);
+
+            // Highlight selected option
+            card.querySelectorAll('.option-label').forEach(l => {
+                l.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10', 'text-primary', 'selected-option');
+            });
+            this.closest('.option-label').classList.add('border-primary', 'bg-primary', 'bg-opacity-10', 'selected-option');
+
+            // Toggle answered tags
+            card.querySelector('.answered-tag').classList.remove('d-none');
+            card.querySelector('.unanswered-tag').classList.add('d-none');
+
+            answered.add(cardIdx);
+            updateProgress();
+        });
+    });
+
+    function updateProgress() {
+        const pct = Math.round((answered.size / totalQuestions) * 100);
+        document.getElementById('progress-bar').style.width = pct + '%';
+        document.getElementById('answered-count').textContent = answered.size;
+    }
+</script>
+
+<!-- Countdown Timer (30 min) -->
+<script>
+    let totalSeconds = 30 * 60;
+    const timerDisplay = document.getElementById('timer-display');
+    const timerBox = document.getElementById('timer-box');
+
+    function updateTimer() {
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+        timerDisplay.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+
+        if (totalSeconds <= 300) { // last 5 min -> red
+            timerDisplay.classList.add('text-danger');
+            timerBox.style.background = 'rgba(220,53,69,0.25)';
+        }
+        if (totalSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerDisplay.textContent = '00:00';
+            alert('⏰ Time is up! Your answers will be submitted automatically.');
+            formDirty = false;
+            document.getElementById('test-form')?.submit();
+        }
+        totalSeconds--;
+    }
+
+    const timerInterval = setInterval(updateTimer, 1000);
+    updateTimer();
+</script>
+
+<!-- Confirm submit dialog -->
+<script>
+    function confirmSubmit() {
+        const unanswered = totalQuestions - answered.size;
+        if (unanswered > 0) {
+            return confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`);
+        }
+        return true;
+    }
+</script>
+
+<style>
+.option-label {
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    background: #fff;
+}
+.option-label:hover {
+    border-color: #0d6efd !important;
+    background: rgba(13,110,253,0.04);
+}
+.option-label.selected-option {
+    border-color: #0d6efd !important;
+    background: rgba(13,110,253,0.07);
+}
+.question-card {
+    transition: box-shadow 0.2s;
+}
+.question-card:target, .question-card:hover {
+    box-shadow: 0 8px 28px rgba(13,110,253,0.12) !important;
+}
+.transition-all {
+    transition: width 0.4s ease;
+}
+.font-monospace { font-family: 'Courier New', monospace; }
+</style>
+
+{% endblock %}

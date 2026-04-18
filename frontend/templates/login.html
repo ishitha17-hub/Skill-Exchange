@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+{% block title %}{% if is_admin %}Admin Login{% else %}Sign In{% endif %} - Skill-Exchange{% endblock %}
+
+{% block content %}
+<style>
+  /* ── Page wrapper ── */
+  .auth-page {
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  /* ── Card split layout ── */
+  .auth-card {
+    display: flex;
+    width: 100%;
+    max-width: 920px;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(13,71,161,0.35);
+  }
+
+  /* ── Left panel (gradient) ── */
+  .auth-panel-left {
+    flex: 1;
+    background: linear-gradient(160deg, #0d47a1 0%, #1565c0 25%, #7b1fa2 60%, #0097a7 100%);
+    padding: 3rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+    color: white;
+    min-width: 300px;
+  }
+
+  /* Animated blob decorations */
+  .auth-panel-left::before {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+    top: -80px; right: -80px;
+    animation: floatBlob 7s ease-in-out infinite alternate;
+  }
+  .auth-panel-left::after {
+    content: '';
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    bottom: -50px; left: -50px;
+    animation: floatBlob 9s ease-in-out infinite alternate-reverse;
+  }
+
+  @keyframes floatBlob {
+    0%   { transform: translateY(0) scale(1); }
+    100% { transform: translateY(30px) scale(1.08); }
+  }
+
+  .auth-brand-icon {
+    width: 60px; height: 60px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.25);
+    position: relative; z-index: 1;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.2); }
+    50%      { box-shadow: 0 0 0 12px rgba(255,255,255,0.0); }
+  }
+
+  .auth-panel-left h2 {
+    font-size: 1.9rem; font-weight: 800;
+    line-height: 1.25; margin-bottom: 1rem;
+    position: relative; z-index: 1;
+  }
+  .auth-panel-left p {
+    font-size: 0.92rem; opacity: 0.82;
+    line-height: 1.6; margin-bottom: 2rem;
+    position: relative; z-index: 1;
+  }
+
+  .auth-feature-list {
+    list-style: none; padding: 0; margin: 0;
+    position: relative; z-index: 1;
+  }
+  .auth-feature-list li {
+    display: flex; align-items: center; gap: 0.65rem;
+    font-size: 0.88rem; opacity: 0.9;
+    margin-bottom: 0.75rem;
+  }
+  .auth-feature-list li .fi {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; flex-shrink: 0;
+  }
+
+  /* ── Right panel (form) ── */
+  .auth-panel-right {
+    flex: 1.1;
+    background: #fff;
+    padding: 3rem 2.8rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .auth-panel-right h3 {
+    font-size: 1.65rem; font-weight: 800;
+    background: linear-gradient(135deg,#1565c0,#7b1fa2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.25rem;
+  }
+
+  /* Custom input */
+  .auth-input-group {
+    position: relative; margin-bottom: 1.2rem;
+  }
+  .auth-input-group label {
+    font-size: 0.75rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    color: #607d8b; margin-bottom: 0.4rem; display: block;
+  }
+  .auth-input-group .input-wrap {
+    position: relative;
+  }
+  .auth-input-group .input-wrap i {
+    position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: #90a4ae; font-size: 1rem; pointer-events: none;
+  }
+  .auth-input-group input {
+    width: 100%;
+    padding: 0.72rem 1rem 0.72rem 2.6rem;
+    border: 1.8px solid #e0e7ef;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    background: #f7faff;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+    color: #1a237e;
+  }
+  .auth-input-group input:focus {
+    border-color: #1565c0;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(21,101,192,0.12);
+  }
+  .auth-input-group input::placeholder { color: #b0bec5; }
+
+  /* Gradient submit button */
+  .auth-btn {
+    width: 100%;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem; font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, #1565c0, #7b1fa2);
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s, opacity .15s;
+    box-shadow: 0 6px 24px rgba(21,101,192,0.35);
+    letter-spacing: 0.03em;
+    margin-top: 0.5rem;
+  }
+  .auth-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(21,101,192,0.45);
+    opacity: 0.95;
+  }
+  .auth-btn:active { transform: translateY(0); }
+
+  .forgot-link {
+    font-size: 0.8rem; font-weight: 600;
+    color: #1565c0; text-decoration: none;
+    transition: color .15s;
+  }
+  .forgot-link:hover { color: #7b1fa2; }
+
+  .auth-divider {
+    text-align: center; margin: 1.1rem 0;
+    position: relative;
+  }
+  .auth-divider::before {
+    content: '';
+    position: absolute; top: 50%; left: 0; right: 0;
+    height: 1px; background: #e0e7ef;
+  }
+  .auth-divider span {
+    position: relative; background: #fff;
+    padding: 0 0.75rem; color: #b0bec5; font-size: 0.8rem;
+  }
+
+  .auth-footer-link {
+    text-align: center; margin-top: 1.1rem;
+    font-size: 0.88rem; color: #78909c;
+  }
+  .auth-footer-link a {
+    color: #1565c0; font-weight: 700; text-decoration: none;
+  }
+  .auth-footer-link a:hover { color: #7b1fa2; }
+
+  /* Floating dots background on right panel */
+  .auth-panel-right::before {
+    content: '';
+    position: absolute;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(21,101,192,0.06), transparent);
+    bottom: -40px; right: -40px;
+    pointer-events: none;
+  }
+
+  .admin-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: linear-gradient(135deg,#b71c1c,#e53935);
+    color: white; border-radius: 20px;
+    padding: 0.25rem 0.75rem; font-size: 0.75rem; font-weight: 700;
+    margin-bottom: 0.8rem; letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 700px) {
+    .auth-panel-left { display: none; }
+    .auth-panel-right { padding: 2rem 1.5rem; }
+    .auth-card { border-radius: 18px; }
+  }
+</style>
+
+<div class="auth-page">
+  <div class="auth-card position-relative">
+
+    <!-- ─── LEFT PANEL ──────────────────────────────── -->
+    <div class="auth-panel-left">
+      <div class="auth-brand-icon">
+        <i class="bi bi-box-seam"></i>
+      </div>
+
+      {% if is_admin %}
+        <h2>Admin<br>Control Panel</h2>
+        <p>Manage users, content, tests, and platform settings from one powerful dashboard.</p>
+      {% else %}
+        <h2>Welcome<br>Back! 👋</h2>
+        <p>Log back in and continue your learning journey on the Smart Skill-Exchange Platform.</p>
+      {% endif %}
+
+      <ul class="auth-feature-list">
+        <li><span class="fi"><i class="bi bi-award"></i></span> Earn certificates on completion</li>
+        <li><span class="fi"><i class="bi bi-play-circle"></i></span> Access video courses</li>
+        <li><span class="fi"><i class="bi bi-journal-check"></i></span> Take mock tests</li>
+        <li><span class="fi"><i class="bi bi-people"></i></span> Connect with learners</li>
+      </ul>
+    </div>
+
+    <!-- ─── RIGHT PANEL ─────────────────────────────── -->
+    <div class="auth-panel-right position-relative">
+
+      {% if is_admin %}
+        <div class="admin-badge"><i class="bi bi-shield-lock-fill"></i> Admin Access Only</div>
+      {% endif %}
+
+      <h3>{% if is_admin %}Admin Sign In{% else %}Sign In{% endif %}</h3>
+      <p class="text-muted small mb-4">
+        {% if is_admin %}Enter your admin credentials to access the dashboard.
+        {% else %}Don't have an account? <a href="{{ url_for('auth.register') }}" style="color:#1565c0;font-weight:700;">Create one free</a>{% endif %}
+      </p>
+
+      <form method="POST" id="login-form">
+
+        <div class="auth-input-group">
+          <label>Email Address</label>
+          <div class="input-wrap">
+            <i class="bi bi-envelope"></i>
+            <input type="email" name="login_user_email" id="login_user_email" placeholder="you@example.com" required autofocus autocomplete="new-password">
+          </div>
+        </div>
+
+        <div class="auth-input-group">
+          <div class="d-flex justify-content-between align-items-center mb-1" style="margin-top:0.1rem;">
+            <label style="margin-bottom:0;">Password</label>
+            {% if not is_admin %}
+            <a href="{{ url_for('auth.forgot_password') }}" class="forgot-link">
+              <i class="bi bi-question-circle me-1"></i>Forgot Password?
+            </a>
+            {% endif %}
+          </div>
+          <div class="input-wrap">
+            <i class="bi bi-lock"></i>
+            <input type="password" name="password" id="password" placeholder="Your password" required autocomplete="new-password"
+              style="padding-right: 2.8rem;">
+            <i class="bi bi-eye" id="toggle-pw"
+              style="left:auto;right:14px;cursor:pointer;pointer-events:auto;color:#90a4ae;"
+              onclick="togglePw()"></i>
+          </div>
+        </div>
+
+        <button type="submit" class="auth-btn" id="login-btn">
+          <i class="bi bi-box-arrow-in-right me-2"></i>
+          {% if is_admin %}Access Dashboard{% else %}Sign In{% endif %}
+        </button>
+      </form>
+
+      {% if not is_admin %}
+      <div class="auth-divider mt-3"><span>or</span></div>
+      <div class="auth-footer-link">
+        New here? <a href="{{ url_for('auth.register') }}">Create a free account →</a>
+      </div>
+      {% endif %}
+
+      <div class="auth-footer-link mt-2">
+        {% if is_admin %}
+          <a href="{{ url_for('auth.login') }}">← Student Login</a>
+        {% else %}
+          <a href="{{ url_for('auth.admin_login') }}">Admin Login →</a>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePw() {
+  const inp = document.getElementById('password');
+  const ico = document.getElementById('toggle-pw');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    ico.className = 'bi bi-eye-slash';
+    ico.style.cssText = ico.style.cssText;
+  } else {
+    inp.type = 'password';
+    ico.className = 'bi bi-eye';
+  }
+}
+document.getElementById('login-form').addEventListener('submit', function () {
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing in...';
+});
+</script>
+{% endblock %}

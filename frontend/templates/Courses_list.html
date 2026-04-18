@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Language Courses - Skill-Exchange{% endblock %}
+{% block content %}
+
+<!-- Hero -->
+<div class="row pt-2 mb-5">
+    <div class="col-12">
+        <div class="card border-0 rounded-4 text-white overflow-hidden position-relative"
+            style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height:170px;">
+            <div class="position-absolute top-0 end-0 opacity-10" style="font-size:12rem;line-height:1;">🌐</div>
+            <div class="card-body p-4 p-md-5 position-relative z-1">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <span class="badge bg-warning text-dark fw-semibold px-3 py-2 rounded-pill">
+                        <i class="bi bi-play-circle-fill me-1"></i>Video Courses
+                    </span>
+                    <span class="badge bg-success fw-semibold px-3 py-2 rounded-pill">
+                        <i class="bi bi-award me-1"></i>Free Certificates
+                    </span>
+                </div>
+                <h2 class="fw-bold mb-1" style="font-size:2rem;">Learn Programming Languages Online</h2>
+                <p class="opacity-75 mb-0 fs-5">Watch curated video lessons · Take a mock test · Earn your certificate</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-5 text-center">
+    <div class="col-4">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-primary bg-opacity-10">
+            <div class="fw-bold fs-3 text-primary">{{ courses|length }}</div>
+            <div class="text-muted small">Courses</div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-success bg-opacity-10">
+            <div class="fw-bold fs-3 text-success">{{ courses|map(attribute='videos')|map('length')|sum }}</div>
+            <div class="text-muted small">Video Lessons</div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-warning bg-opacity-10">
+            <div class="fw-bold fs-3 text-warning">{{ earned|length }}</div>
+            <div class="text-muted small">Certificates Earned</div>
+        </div>
+    </div>
+</div>
+
+<!-- Course Cards -->
+<div class="row g-4">
+    {% for course in courses %}
+    {% set is_earned = course.course_id in earned %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden course-card">
+            <!-- Top gradient header -->
+            <div class="p-4 text-white position-relative" style="background: {{ course.gradient }}; min-height:120px;">
+                {% if is_earned %}
+                <span class="position-absolute top-0 end-0 m-3 badge bg-warning text-dark fw-bold rounded-pill shadow-sm">
+                    <i class="bi bi-award-fill me-1"></i>Certified!
+                </span>
+                {% endif %}
+                <div class="d-flex align-items-center gap-3">
+                    {% if course.icon %}
+                    <div class="d-flex align-items-center justify-content-center rounded-3 flex-shrink-0"
+                        style="width:54px;height:54px; background: rgba(255,255,255,0.15); backdrop-filter: blur(4px);">
+                        <i class="{{ course.icon }} fs-2 text-white"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h5 class="fw-bold mb-0">{{ course.title }}</h5>
+                        <div class="d-flex gap-2 mt-1 flex-wrap">
+                            {% if course.level %}<span class="badge small" style="background: rgba(255,255,255,0.15);">{{ course.level }}</span>{% endif %}
+                            {% if course.duration %}<span class="badge small" style="background: rgba(255,255,255,0.15);"><i class="bi bi-clock me-1"></i>{{ course.duration }}</span>{% endif %}
+                            {% if course.videos %}<span class="badge small" style="background: rgba(255,255,255,0.15);"><i class="bi bi-camera-video me-1"></i>{{ course.videos|length }} videos</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-4 d-flex flex-column">
+                <p class="text-muted small mb-3 flex-grow-1">{{ course.subtitle }}</p>
+
+                <!-- Progress markers -->
+                <div class="d-flex gap-2 flex-wrap mb-3">
+                    <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3">
+                        <i class="bi bi-question-circle me-1"></i>{{ course.questions|length }}-Q Quiz
+                    </span>
+                    <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3">
+                        <i class="bi bi-award me-1"></i>Certificate
+                    </span>
+                </div>
+
+                <div class="d-grid">
+                    <a href="{{ url_for('course.course_detail', course_id=course.course_id) }}"
+                        class="btn rounded-pill fw-bold py-2 {% if is_earned %}btn-success{% else %}btn-primary{% endif %} shadow-sm">
+                        {% if is_earned %}
+                        <i class="bi bi-check-circle me-2"></i>Review Course
+                        {% else %}
+                        <i class="bi bi-play-circle me-2"></i>Start Learning
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.course-card { transition: transform .22s ease, box-shadow .22s ease; }
+.course-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(0,0,0,0.13) !important; }
+</style>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}Mock Tests - Skill-Exchange{% endblock %}
+{% block content %}
+
+<!-- Hero Banner -->
+<div class="row pt-3 mb-5">
+    <div class="col-12">
+        <div class="card border-0 rounded-4 text-white overflow-hidden position-relative"
+            style="background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%); min-height: 160px;">
+            <div class="position-absolute top-0 end-0 opacity-10 pe-3 pt-3">
+                <i class="bi bi-journal-check" style="font-size: 9rem;"></i>
+            </div>
+            <div class="card-body p-4 p-md-5 d-flex flex-column justify-content-center position-relative z-1">
+                <nav aria-label="breadcrumb" class="mb-2">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ url_for('user.dashboard') }}"
+                                class="text-white-50 text-decoration-none">Dashboard</a></li>
+                        {% if skill_id %}
+                        <li class="breadcrumb-item"><a href="{{ url_for('user.browse_skills') }}"
+                                class="text-white-50 text-decoration-none">Skills</a></li>
+                        {% endif %}
+                        <li class="breadcrumb-item active text-white" aria-current="page">Mock Tests</li>
+                    </ol>
+                </nav>
+                <h2 class="fw-bold mb-1">Online Mock Tests</h2>
+                <p class="mb-0 opacity-75 fs-5">
+                    {% if skill_id %}Tests for: <strong>{{ skill_title }}</strong>{% else %}All available tests{% endif %}
+                    &nbsp;·&nbsp; Score 70% or more to <span class="badge bg-warning text-dark fw-semibold"><i
+                            class="bi bi-award me-1"></i>Earn a Certificate</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Test Cards -->
+<div class="row g-4">
+    {% if tests %}
+    {% for test in tests %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden test-card">
+            <!-- Colored top strip -->
+            <div style="height:5px; background: linear-gradient(90deg, #0d6efd, #6610f2);"></div>
+            <div class="card-body p-4 d-flex flex-column">
+                <!-- Icon + Title -->
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary bg-opacity-10 text-primary flex-shrink-0"
+                        style="width:52px;height:52px;">
+                        <i class="bi bi-journal-check fs-3"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1 lh-sm">{{ test.title }}</h5>
+                        <span class="badge bg-light text-muted fw-normal border">
+                            <i class="bi bi-cpu me-1"></i>{{ test.get('skill_name', 'General') if test.skill_name is defined else 'General' }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Info Badges -->
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3">
+                        <i class="bi bi-award me-1"></i>Certificate on pass
+                    </span>
+                    <span class="badge rounded-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3">
+                        <i class="bi bi-check2-circle me-1"></i>Pass @ 70%
+                    </span>
+                </div>
+
+                <p class="text-muted small mb-4 flex-grow-1">
+                    Answer all questions carefully. You must score at least 70% to pass and automatically receive
+                    a downloadable completion certificate.
+                </p>
+
+                <div class="d-grid mt-auto">
+                    <a href="{{ url_for('user.take_test', test_id=test._id) }}"
+                        class="btn btn-primary rounded-pill fw-bold shadow-sm py-2">
+                        <i class="bi bi-play-circle me-2"></i>Start Test
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <div class="bg-white p-5 rounded-4 shadow-sm border">
+            <i class="bi bi-file-earmark-x display-1 text-muted opacity-25 mb-4 d-block"></i>
+            <h4 class="fw-bold">No Tests Available Yet</h4>
+            <p class="text-muted">There are currently no mock tests available. Check back soon!</p>
+            <a href="{{ url_for('user.browse_skills') }}"
+                class="btn btn-outline-primary px-4 mt-2 rounded-pill">Explore Skills</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.test-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.test-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(13,110,253,0.15) !important;
+}
+</style>
+{% endblock %}
