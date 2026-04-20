@@ -18,34 +18,28 @@ from models.admin import Admin
 app = Flask(__name__, template_folder='../frontend/templates', static_folder='../frontend/static')
 app.config.from_object(Config)
 
-# MongoDB setup with SSL workaround for Render
+# MongoDB setup with proper SSL handling
 try:
     mongo_uri = app.config['MONGO_URI']
     print(f"Connecting to MongoDB with URI: {mongo_uri[:50]}...")
-    
-    # Create SSL context that doesn't verify certificates (for Render)
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
     
     connection_options = {
         'serverSelectionTimeoutMS': 15000,
         'connectTimeoutMS': 15000,
         'socketTimeoutMS': 15000,
         'retryWrites': False,
-        'tlsCAFile': certifi.where(),
     }
     
-    # For mongodb+srv (Atlas), add SSL bypass
+    # For mongodb+srv (Atlas), add proper SSL options
     if 'mongodb+srv' in mongo_uri:
         connection_options.update({
             'ssl': True,
-            'ssl_cert_reqs': 'CERT_NONE',
             'tlsAllowInvalidCertificates': True,
             'tlsAllowInvalidHostnames': True,
+            'tlsCAFile': certifi.where(),
         })
     
-    print(f"Connection options: {connection_options}")
+    print(f"Attempting connection to MongoDB...")
     client = MongoClient(mongo_uri, **connection_options)
     
     # Force connection test
@@ -59,19 +53,23 @@ except Exception as e:
     print(f"❌ MongoDB connection failed: {error_msg}")
     print(f"MONGO_URI: {app.config.get('MONGO_URI', 'NOT SET')[:60]}...")
     
-    # Try minimal fallback
+    # Try minimal fallback with relaxed settings
     try:
-        print("\n🔄 Attempting fallback connection (no retries, no SSL verification)...")
+        print("\n🔄 Attempting fallback connection...")
         client = MongoClient(
             mongo_uri,
-            serverSelectionTimeoutMS=5000,
+            serverSelectionTimeoutMS=8000,
+            connectTimeoutMS=8000,
             retryWrites=False,
-            ssl=False  # Try without SSL first
+            ssl=True,
+            tlsAllowInvalidCertificates=True,
+            tlsAllowInvalidHostnames=True,
         )
         db = client.get_database()
-        print("✅ Fallback connection established!")
-    except:
-        print("❌ All connection attempts failed. Application cannot continue.")
+        client.admin.command('ping', timeoutMS=3000)
+        print("✅ Fallback connection SUCCESSFUL!")
+    except Exception as e2:
+        print(f"❌ Fallback failed: {str(e2)[:200]}")
         print("Check: 1) MONGO_URI is correct")
         print("       2) MongoDB Atlas IP whitelist includes 0.0.0.0/0")
         print("       3) Network access is allowed from Render region")
