@@ -17,15 +17,19 @@ app = Flask(__name__, template_folder='../frontend/templates', static_folder='..
 app.config.from_object(Config)
 
 # MongoDB setup
-client = MongoClient(app.config['MONGO_URI'])
-db = client.get_database()
-
-# Debug: Verifying connection in the same file
 try:
+    mongo_uri = app.config['MONGO_URI']
+    print(f"Connecting to MongoDB with URI: {mongo_uri[:50]}...")
+    client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)
+    db = client.get_database()
+    # Verify connection
     client.admin.command('ping')
-    print("DEBUG: MongoDB connection successful!")
+    print("✅ MongoDB connection successful!")
 except Exception as e:
-    print(f"DEBUG ERROR: MongoDB connection failed: {e}")
+    print(f"❌ MongoDB connection failed: {e}")
+    print(f"MONGO_URI from config: {app.config.get('MONGO_URI', 'NOT SET')}")
+    print("Exiting due to database connection error")
+    sys.exit(1)
 
 # Flask-Login setup
 login_manager = LoginManager()
