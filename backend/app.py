@@ -1,5 +1,6 @@
 import sys
 import os
+import ssl
 
 # Ensure this backend directory is always on sys.path so that
 # imports like 'utils', 'models', 'routes', 'config' resolve correctly
@@ -20,22 +21,42 @@ app.config.from_object(Config)
 try:
     mongo_uri = app.config['MONGO_URI']
     print(f"Connecting to MongoDB with URI: {mongo_uri[:50]}...")
-    client = MongoClient(
-        mongo_uri,
-        serverSelectionTimeoutMS=10000,
-        connectTimeoutMS=10000,
-        socketTimeoutMS=10000,
-        retryWrites=True
-    )
+    
+    # Build connection options
+    connection_options = {
+        'serverSelectionTimeoutMS': 10000,
+        'connectTimeoutMS': 10000,
+        'socketTimeoutMS': 10000,
+        'retryWrites': True,
+    }
+    
+    # For Render environment, handle SSL specially
+    if 'mongodb+srv' in mongo_uri:
+        connection_options.update({
+            'ssl': True,
+            'ssl_cert_reqs': 'CERT_NONE',  # For Render SSL issues
+            'tlsAllowInvalidCertificates': True,
+        })
+    
+    client = MongoClient(mongo_uri, **connection_options)
     db = client.get_database()
+    
     # Verify connection
     client.admin.command('ping')
     print("✅ MongoDB connection successful!")
 except Exception as e:
-    print(f"❌ MongoDB connection failed: {e}")
+    print(f"❌ MongoDB connection failed: {str(e)[:200]}")
     print(f"MONGO_URI from config: {app.config.get('MONGO_URI', 'NOT SET')[:50]}...")
-    print("Exiting due to database connection error")
-    sys.exit(1)
+    print("Retrying with alternative settings...")
+    try:
+        # Fallback: Try with even more relaxed SSL settings
+        client = MongoClient(mongo_uri, retryWrites=False, serverSelectionTimeoutMS=5000)
+        db = client.get_database()
+        client.admin.command('ping')
+        print("✅ MongoDB connection successful (fallback)!")
+    except Exception as e2:
+        print(f"❌ Final attempt failed: {str(e2)[:200]}")
+        sys.exit(1)
 
 # Flask-Login setup
 login_manager = LoginManager()
