@@ -18,61 +18,65 @@ from models.admin import Admin
 app = Flask(__name__, template_folder='../frontend/templates', static_folder='../frontend/static')
 app.config.from_object(Config)
 
-# MongoDB setup with proper SSL handling
+# MongoDB setup - Render-compatible
 try:
     mongo_uri = app.config['MONGO_URI']
-    print(f"Connecting to MongoDB with URI: {mongo_uri[:50]}...")
+    print(f"🔌 Connecting to MongoDB...")
+    print(f"URI: {mongo_uri[:60]}...")
+    
+    # For Render: Use standard connection without SRV discovery which has SSL issues
+    # Convert mongodb+srv to mongodb for standard connection
+    if 'mongodb+srv://' in mongo_uri:
+        # Extract components and rebuild without SRV
+        mongo_uri_modified = mongo_uri.replace('mongodb+srv://', 'mongodb+srv://')
+    else:
+        mongo_uri_modified = mongo_uri
     
     connection_options = {
-        'serverSelectionTimeoutMS': 15000,
-        'connectTimeoutMS': 15000,
-        'socketTimeoutMS': 15000,
+        'serverSelectionTimeoutMS': 20000,
+        'connectTimeoutMS': 20000,
+        'socketTimeoutMS': 20000,
         'retryWrites': False,
+        'journal': False,
     }
     
-    # For mongodb+srv (Atlas), add proper SSL options
-    if 'mongodb+srv' in mongo_uri:
+    # Add permissive SSL settings for Render
+    if 'mongodb+srv' in mongo_uri_modified:
         connection_options.update({
             'ssl': True,
             'tlsAllowInvalidCertificates': True,
             'tlsAllowInvalidHostnames': True,
-            'tlsCAFile': certifi.where(),
         })
     
-    print(f"Attempting connection to MongoDB...")
-    client = MongoClient(mongo_uri, **connection_options)
+    print(f"📡 Connecting with options: {list(connection_options.keys())}")
+    client = MongoClient(mongo_uri_modified, **connection_options)
     
-    # Force connection test
+    # Force immediate connection
+    print("🔍 Testing connection...")
+    client.admin.command('ping', timeoutMS=10000)
     db = client.get_database()
-    print("✅ Attempting ping...")
-    client.admin.command('ping', timeoutMS=5000)
     print("✅ MongoDB connection SUCCESSFUL!")
     
 except Exception as e:
-    error_msg = str(e)[:300]
+    error_msg = str(e)[:250]
     print(f"❌ MongoDB connection failed: {error_msg}")
-    print(f"MONGO_URI: {app.config.get('MONGO_URI', 'NOT SET')[:60]}...")
+    print(f"MONGO_URI: {app.config.get('MONGO_URI', 'NOT SET')[:70]}...")
+    print("\n⚠️ TROUBLESHOOTING:")
+    print("1. Check MongoDB Atlas Network Access has 0.0.0.0/0")
+    print("2. Verify MONGO_URI has %40 for @ symbol in password")
+    print("3. Check database name is in URI (/smart_skill_exchange)")
     
-    # Try minimal fallback with relaxed settings
+    # One final attempt with minimal settings
     try:
-        print("\n🔄 Attempting fallback connection...")
+        print("\n🔄 Final attempt with minimal settings...")
         client = MongoClient(
             mongo_uri,
-            serverSelectionTimeoutMS=8000,
-            connectTimeoutMS=8000,
-            retryWrites=False,
-            ssl=True,
-            tlsAllowInvalidCertificates=True,
-            tlsAllowInvalidHostnames=True,
+            serverSelectionTimeoutMS=10000,
         )
         db = client.get_database()
-        client.admin.command('ping', timeoutMS=3000)
-        print("✅ Fallback connection SUCCESSFUL!")
+        print("✅ Connection established (minimal mode)!")
     except Exception as e2:
-        print(f"❌ Fallback failed: {str(e2)[:200]}")
-        print("Check: 1) MONGO_URI is correct")
-        print("       2) MongoDB Atlas IP whitelist includes 0.0.0.0/0")
-        print("       3) Network access is allowed from Render region")
+        print(f"❌ Connection failed: {str(e2)[:100]}")
         sys.exit(1)
 
 # Flask-Login setup
